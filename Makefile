@@ -83,6 +83,9 @@ report: ## Собрать отчёт DOCX + PDF
 diagram: ## Сгенерировать диаграмму модели (PNG/SVG из DOT)
 	python3 scripts/make_diagram.py
 
+mark-screenshots: ## Разметить места под скриншоты в отчёте (+ заглушки в docs/report/img)
+	python3 scripts/mark_screenshots.py
+
 screenshots: ## Сгенерировать план скриншотов и текстовые транскрипты
 	bash scripts/make_transcripts.sh
 
