@@ -1,0 +1,100 @@
+digraph data_vault {
+    rankdir=LR;
+    graph [fontname="Helvetica", fontsize=11, splines=ortho, nodesep=0.35, ranksep=0.9,
+           labelloc="t", label="Модель Data Vault 2.0: датасет Superstore (9994 строки источника)\nСлои: staging -> raw vault (hubs/links/satellites) -> business vault -> data marts",
+           bgcolor="white"];
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, margin="0.12,0.07"];
+    edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+    subgraph cluster_stg {
+        label="Staging (ODS)"; style="rounded,dashed"; color="#999999"; fontsize=10;
+        stg_raw [label="stg_superstore_raw\n(TEXT 1:1 с CSV, AO/column, партиции по load_dts)", fillcolor="#F2F2F2", shape=box3d];
+        stg_clean [label="stg_superstore_clean\n(типы, lpad ZIP, все хеш-ключи)", fillcolor="#E8F0FE", shape=box3d];
+        stg_raw -> stg_clean [label="валидация + хеши"];
+    }
+
+    subgraph cluster_geo {
+        label="Гео-иерархия"; style="rounded"; color="#4C78A8";
+        hub_country  [label="hub_country\nBK: country_name\n1 запись", fillcolor="#CFE2F3"];
+        hub_region   [label="hub_region\nBK: region_name\n4", fillcolor="#CFE2F3"];
+        hub_state    [label="hub_state\nBK: state_name\n49", fillcolor="#CFE2F3"];
+        hub_location [label="hub_location\nBK: postal_code + city\n632", fillcolor="#CFE2F3"];
+    }
+
+    subgraph cluster_prod {
+        label="Товары, доставка, покупатель"; style="rounded"; color="#7E57C2";
+        hub_category     [label="hub_category\nBK: category_name\n3", fillcolor="#E1D5E7"];
+        hub_sub_category [label="hub_sub_category\nBK: sub_category_name\n17", fillcolor="#E1D5E7"];
+        hub_ship_mode    [label="hub_ship_mode\nBK: ship_mode_name\n4", fillcolor="#E1D5E7"];
+        hub_segment      [label="hub_segment\nBK: segment_name\n3", fillcolor="#E1D5E7"];
+    }
+
+    lnk_region_country        [label="lnk_region_country\n4", fillcolor="#D5E8D4"];
+    lnk_state_region          [label="lnk_state_region\n49", fillcolor="#D5E8D4"];
+    lnk_location_state        [label="lnk_location_state\n632", fillcolor="#D5E8D4"];
+    lnk_category_sub_category [label="lnk_category_sub_category\n17", fillcolor="#D5E8D4"];
+    lnk_sales_line            [label="lnk_sales_line\n(транзакционная ссылка)\n6868 комбинаций", fillcolor="#FFE6CC", penwidth=2];
+
+    sat_location     [label="sat_location\nstate/region/country\n632 версии", fillcolor="#FFF2CC"];
+    sat_sub_category [label="sat_sub_category\ncategory_name\n17", fillcolor="#FFF2CC"];
+    sat_ship_mode    [label="sat_ship_mode\nship_speed_rank\n4", fillcolor="#FFF2CC"];
+    sat_segment      [label="sat_segment\nsegment_type\n3", fillcolor="#FFF2CC"];
+    sat_sales_line   [label="sat_sales_line (link satellite)\nSales, Quantity, Discount,\nProfit, HASH_DIFF, SALES_LINE_COUNT\n9977 версий мер", fillcolor="#F8CECC", penwidth=2];
+
+    subgraph cluster_bv {
+        label="Business Vault"; style="rounded,dashed"; color="#B48EAD";
+        ref_tables [label="ref_ship_mode\nref_segment", fillcolor="#EFE1F7"];
+        efs        [label="efs_location_state\nefs_state_region", fillcolor="#EFE1F7"];
+        rts        [label="rts_hub_record\n(все хабы)", fillcolor="#EFE1F7"];
+        pit        [label="pit_location\n632 на снимок", fillcolor="#EFE1F7"];
+        bridge     [label="bridge_sales_line\n9977 строк", fillcolor="#EFE1F7", penwidth=2];
+    }
+
+    // staging -> hubs
+    stg_clean -> hub_country       [style=dashed, color="#4C78A8"];
+    stg_clean -> hub_region        [style=dashed, color="#4C78A8"];
+    stg_clean -> hub_state         [style=dashed, color="#4C78A8"];
+    stg_clean -> hub_location      [style=dashed, color="#4C78A8"];
+    stg_clean -> hub_category      [style=dashed, color="#7E57C2"];
+    stg_clean -> hub_sub_category  [style=dashed, color="#7E57C2"];
+    stg_clean -> hub_ship_mode     [style=dashed, color="#7E57C2"];
+    stg_clean -> hub_segment       [style=dashed, color="#7E57C2"];
+
+    // иерархические ссылки
+    hub_region -> lnk_region_country -> hub_country;
+    hub_state -> lnk_state_region -> hub_region;
+    hub_location -> lnk_location_state -> hub_state;
+    hub_category -> lnk_category_sub_category -> hub_sub_category;
+
+    // транзакционная ссылка и её сателлит мер
+    hub_location     -> lnk_sales_line;
+    hub_sub_category -> lnk_sales_line;
+    hub_ship_mode    -> lnk_sales_line;
+    hub_segment      -> lnk_sales_line;
+    lnk_sales_line -> sat_sales_line [label="1:N версий мер", penwidth=2];
+
+    // сателлиты хабов
+    hub_location     -> sat_location;
+    hub_sub_category -> sat_sub_category;
+    hub_ship_mode    -> sat_ship_mode;
+    hub_segment      -> sat_segment;
+
+    // business vault
+    sat_ship_mode -> ref_tables [style=dotted];
+    sat_segment   -> ref_tables [style=dotted];
+    lnk_location_state -> efs [style=dotted];
+    lnk_state_region   -> efs [style=dotted];
+    hub_location -> rts [style=dotted];
+    hub_location -> pit [style=dotted];
+    sat_sales_line -> bridge [penwidth=2];
+    hub_location     -> bridge [style=dotted];
+    sat_sub_category -> bridge [style=dotted];
+    sat_ship_mode    -> bridge [style=dotted];
+    sat_segment      -> bridge [style=dotted];
+
+    // витрины
+    bridge -> dm_region;
+    bridge -> dm_star;
+    bridge -> dm_view;
+}
+

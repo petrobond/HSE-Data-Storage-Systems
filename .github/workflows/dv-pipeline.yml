@@ -1,0 +1,82 @@
+name: Data Vault pipeline (Greenplum)
+
+# Воспроизводимый прогон: DDL -> загрузка датасета -> автотесты -> артефакт с отчётом.
+# Требуется секрет репозитория KAGGLE_API_TOKEN (Kaggle -> Settings -> API -> Generate New Token).
+# Без секрета шаг скачивания датасета пропускается, поэтому шаги загрузки/тестов не выполняются.
+
+on:
+  push:
+    branches: [main, dev, 'release/**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  data-vault-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      greenplum:
+        image: andruche/greenplum:7-4seg
+        ports:
+          - 15432:5432
+        options: >-
+          --health-cmd "psql -U gpadmin -d postgres -Atc 'select count(*) from gp_segment_configuration'"
+          --health-interval 10s
+          --health-timeout 10s
+          --health-retries 30
+          --health-start-period 30s
+
+    env:
+      GP_HOST: localhost
+      GP_PORT: 15432
+      GP_USER: gpadmin
+      GP_PASSWORD: ''
+      GP_DATABASE: vault_dv
+      GP_MAINT_DB: postgres
+      GP_SSLMODE: prefer
+      KAGGLE_API_KEY: ${{ secrets.KAGGLE_API_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Показать версию Greenplum
+        run: psql -h $GP_HOST -p $GP_PORT -U $GP_USER -d postgres -c "SELECT version();"
+
+      - name: Создать БД, схемы и таблицы (DDL)
+        run: make ddl
+
+      - name: Скачать датасет и загрузить staging
+        if: ${{ env.KAGGLE_API_KEY != '' }}
+        run: |
+          make download
+          make profile
+          make stage
+
+      - name: ELT: хабы, ссылки, сателлиты, Business Vault, витрины
+        if: ${{ env.KAGGLE_API_KEY != '' }}
+        run: make load
+
+      - name: Автотесты корректности (118 проверок)
+        if: ${{ env.KAGGLE_API_KEY != '' }}
+        run: make test
+
+      - name: Пропущено из-за отсутствия секрета KAGGLE_API_TOKEN
+        if: ${{ env.KAGGLE_API_KEY == '' }}
+        run: |
+          echo "::warning::Не задан секрет KAGGLE_API_TOKEN — проверены только DDL-шаги."
+          echo "Добавьте секрет: Settings -> Secrets and variables -> Actions -> New repository secret."
+
+      - name: Текстовые транскрипты и план скриншотов
+        if: ${{ env.KAGGLE_API_KEY != '' }}
+        run: make screenshots
+
+      - name: Отчёт тестов в артефакт сборки
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-vault-test-report
+          path: |
+            docs/tmp/transcripts/
+            docs/tmp/screenshots_plan.md
+          if-no-files-found: warn

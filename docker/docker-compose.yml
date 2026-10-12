@@ -1,0 +1,34 @@
+# Greenplum 7 (локальная реализация ДЗ).
+#
+# ВАЖНО про порт: на хосте 5432 уже занят локальным SSH-туннелем
+# (`ssh -f -N octane-dev`, LocalForward 5432), поэтому наружу публикуем 15432.
+#
+# Образы (arm64, без эмуляции):
+#   andruche/greenplum:7-4seg  — GP 7.0.0, координатор + 4 сегмента (по умолчанию)
+#   andruche/greenplum:7       — GP 7.0.0, 2 сегмента
+#   andruche/greenplum:6-4seg  — GP 6.25.3 (для демонстрации различий GP6/GP7)
+#   woblerr/greenplum:7.1.0    — GP 7.1.0, требует GREENPLUM_PASSWORD, БД `demo`
+#
+# Запуск:  docker compose -f docker/docker-compose.yml up -d
+# Стоп:    docker compose -f docker/docker-compose.yml down
+# Снос:    docker compose -f docker/docker-compose.yml down --rmi local
+#
+# Тома намеренно НЕ используются: образ уже содержит инициализированный кластер
+# в /data, а ДЗ требует полностью снести следы после выполнения.
+services:
+  greenplum:
+    image: andruche/greenplum:7-4seg
+    container_name: gp7
+    hostname: gp7
+    ports:
+      - "15432:5432"
+    # Координатор стартует в admin-режиме и несколько секунд отклоняет обычные
+    # подключения ("System was started in single node mode...") — поэтому
+    # healthcheck с start_period и реальным запросом к таблице.
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U gpadmin -d postgres -Atc \"select count(*) from gp_segment_configuration\" | grep -q 5"]
+      interval: 5s
+      timeout: 10s
+      retries: 40
+      start_period: 20s
+    restart: "no"
