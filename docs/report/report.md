@@ -62,10 +62,6 @@ date: "2026"
 3. **Отсутствие дат.** Версии в сателлитах не имеют временной шкалы источника; `VALID_FROM` фиксирует дату
    загрузки, `VALID_TO` открыт (`NULL`), метки `ACTIVE_FLAG`/`DELETED_FLAG` заполнены. При появлении в источнике
    даты заказа механизм type-2 включится штатно — структура таблиц не меняется.
-![Рис. 17. Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки](img/17_dq_profile.png)
-
-*Рис. 17. Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки. Подготовка: `psql ... -c 'SELECT * FROM dm.dm_dq_source_profile;'`.*
-
 ## 2. Часть 1. Проектирование хранилища методом Data Vault
 
 ### 2.1. Архитектура слоёв
@@ -159,7 +155,9 @@ date: "2026"
 
 ### 2.5. Диаграмма модели
 
-![Модель Data Vault: хабы, ссылки, сателлиты, Business Vault и витрины](diagrams/dv_model.png)
+![Рис. 1. Спроектированная модель Data Vault 2.0: хабы, ссылки, сателлиты, Business Vault и витрины](diagrams/dv_model.png)
+
+*Рис. 1. Спроектированная модель Data Vault 2.0: хабы, ссылки, сателлиты, Business Vault и витрины. Подготовка: `python3 scripts/make_diagram.py`.*
 
 Источник диаграммы: `docs/report/diagrams/dv_model.dot` (рендер — `scripts/make_diagram.py`).
 
@@ -179,13 +177,13 @@ date: "2026"
 | `sql/04_bv/10_ddl_business_vault.sql` | 7 объектов Business Vault (reference, EFS, RTS, PIT, Bridge) |
 | `sql/05_marts/10_ddl_marts.sql` | 3 materialized view, витрина-«звезда», представление |
 
-![Рис. 4. Все 18 таблиц схемы vault созданы](img/04_tables_vault.png)
+![Рис. 2. Все 18 таблиц схемы vault созданы](img/04_tables_vault.png)
 
-*Рис. 4. Все 18 таблиц схемы vault созданы. Подготовка: `psql ... -c '\dt vault.*'`.*
+*Рис. 2. Все 18 таблиц схемы vault созданы. Подготовка: `psql ... -c '\dt vault.*'`.*
 
-![Рис. 5. DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии](img/05_ddl_link.png)
+![Рис. 3. DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии](img/05_ddl_link.png)
 
-*Рис. 5. DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии. Подготовка: `psql ... -c '\d+ vault.lnk_sales_line'`.*
+*Рис. 3. DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии. Подготовка: `psql ... -c '\d+ vault.lnk_sales_line'`.*
 
 В коде — построчные комментарии, объясняющие выбор решения; **для каждой таблицы и каждой колонки схемы
 `vault` в БД выполнен `COMMENT ON`** (это проверяется автотестом t01 через `pg_description`).
@@ -260,13 +258,13 @@ PARTITION BY RANGE (sat_load_dts)
 );
 ```
 
-![Рис. 6. DDL сателлита мер: AO/column, zstd, PK, CHECK, партиции](img/06_ddl_satellite.png)
+![Рис. 4. DDL сателлита мер: AO/column, zstd, PK, CHECK, партиционирование](img/06_ddl_satellite.png)
 
-*Рис. 6. DDL сателлита мер: AO/column, zstd, PK, CHECK, партиции. Подготовка: `psql ... -c '\d+ vault.sat_sales_line'`.*
+*Рис. 4. DDL сателлита мер: AO/column, zstd, PK, CHECK, партиционирование. Подготовка: `psql ... -c '\d+ vault.sat_sales_line'`.*
 
-![Рис. 19. Исходный код DDL с комментариями в редакторе VS Code](img/19_vscode_ddl.png)
+![Рис. 5. Исходный код DDL с комментариями в редакторе VS Code](img/19_vscode_ddl.png)
 
-*Рис. 19. Исходный код DDL с комментариями в редакторе VS Code. Подготовка: `открыть sql/02_vault/10_ddl_hubs.sql`.*
+*Рис. 5. Исходный код DDL с комментариями в редакторе VS Code. Подготовка: `открыть sql/02_vault/10_ddl_hubs.sql`.*
 
 Полный DDL — в каталогах `sql/02_vault`, `sql/04_bv`, `sql/05_marts`; листинг объектов — в транскриптах
 `docs/tmp/transcripts/05_ddl_objects.txt` и `30_storage_distribution.txt`.
@@ -282,17 +280,17 @@ PARTITION BY RANGE (sat_load_dts)
 набор команд выполняется и в Managed Greenplum YC: достаточно подставить параметры подключения в `.env`
 (в файле оставлен готовый блок для YC: порт 6432, `sslmode=require`).
 
-![Рис. 1. Локальный кластер Greenplum запущен в Docker (контейнер gp7)](img/01_greenplum_running.png)
+![Рис. 6. Локальный кластер Greenplum запущен в Docker (контейнер gp7)](img/01_greenplum_running.png)
 
-*Рис. 1. Локальный кластер Greenplum запущен в Docker (контейнер gp7). Подготовка: `docker ps`.*
+*Рис. 6. Локальный кластер Greenplum запущен в Docker (контейнер gp7). Подготовка: `docker ps`.*
 
-![Рис. 2. Версия СУБД Greenplum Database 7.0.0](img/02_version.png)
+![Рис. 7. Версия СУБД: Greenplum Database 7.0.0](img/02_version.png)
 
-*Рис. 2. Версия СУБД Greenplum Database 7.0.0. Подготовка: `psql ... -c 'SELECT version();'`.*
+*Рис. 7. Версия СУБД: Greenplum Database 7.0.0. Подготовка: `psql ... -c 'SELECT version();'`.*
 
-![Рис. 3. MPP-топология: координатор и 4 сегмента](img/03_mpp_topology.png)
+![Рис. 8. MPP-топология: координатор и 4 сегмента](img/03_mpp_topology.png)
 
-*Рис. 3. MPP-топология: координатор и 4 сегмента. Подготовка: `psql ... -c 'SELECT * FROM gp_segment_configuration;'`.*
+*Рис. 8. MPP-топология: координатор и 4 сегмента. Подготовка: `psql ... -c 'SELECT * FROM gp_segment_configuration;'`.*
 
 Версия СУБД: `PostgreSQL 12.12 (Greenplum Database 7.0.0)`; топология — координатор + 4 сегмента
 (транскрипт `00_environment.txt`, представление `gp_segment_configuration`).
@@ -346,13 +344,13 @@ make report              # собрать DOCX/PDF для Google Docs
   позволяет пройти путь «строка файла → строка хранилища → обратно» (`40_lineage_trace.txt`).
 - Защита от «тихой» загрузки: если staging пуст, скрипты ELT останавливаются с ошибкой (`DO $$ … RAISE EXCEPTION`).
 
-![Рис. 7. Загрузка датасета в staging: 9994 строки, карантин пуст](img/07_load_staging.png)
+![Рис. 11. Загрузка датасета в staging: 9994 строки, карантин пуст](img/07_load_staging.png)
 
-*Рис. 7. Загрузка датасета в staging: 9994 строки, карантин пуст. Подготовка: `make stage`.*
+*Рис. 11. Загрузка датасета в staging: 9994 строки, карантин пуст. Подготовка: `make stage`.*
 
-![Рис. 8. ELT: загрузка хабов, ссылок, сателлитов и реконсиляция](img/08_load_dds.png)
+![Рис. 12. ELT: загрузка хабов, ссылок, сателлитов и реконсиляция](img/08_load_dds.png)
 
-*Рис. 8. ELT: загрузка хабов, ссылок, сателлитов и реконсиляция. Подготовка: `make load`.*
+*Рис. 12. ELT: загрузка хабов, ссылок, сателлитов и реконсиляция. Подготовка: `make load`.*
 
 ## 5. Тесты корректности
 
@@ -379,9 +377,9 @@ make report              # собрать DOCX/PDF для Google Docs
 | t07 | качество данных, Business Vault, reference-таблицы, метрики DQ | 15 |
 | t08 | карантин: «плохая» строка отклоняется реальным загрузчиком и не попадает в очищенный слой | 3 |
 
-![Рис. 11. Результат автотестов: 118 проверок, 0 провалено](img/11_tests_all_pass.png)
+![Рис. 13. Результат автотестов: 118 проверок, 0 провалено](img/11_tests_all_pass.png)
 
-*Рис. 11. Результат автотестов: 118 проверок, 0 провалено. Подготовка: `make test`.*
+*Рис. 13. Результат автотестов: 118 проверок, 0 провалено. Подготовка: `make test`.*
 
 **Итог: 118 проверок — 118 PASS, 0 FAIL** («ВСЕ ТЕСТЫ ПРОЙДЕНЫ — модель Data Vault корректна и сходится с
 источником»). Полный отчёт: `docs/tmp/transcripts/tests_report.txt`.
@@ -416,9 +414,9 @@ SELECT audit.mk_check('t02', 'hub_location_key = md5(postal|city)', '0', count(*
   временных join'ов.
 - `bv.bridge_sales_line` — Bridge: «расплющенная» строка продажи со всеми измерениями и мерами (9977 строк).
   Соединения Data Vault материализуются один раз, после чего витрины считаются без повторных join'ов.
-![Рис. 16. Аналитические витрины, построенные поверх Data Vault](img/16_marts.png)
+![Рис. 14. Аналитические витрины, построенные поверх Data Vault](img/16_marts.png)
 
-*Рис. 16. Аналитические витрины, построенные поверх Data Vault. Подготовка: `psql ... -c 'SELECT * FROM dm.dm_sales_by_region_category;'`.*
+*Рис. 14. Аналитические витрины, построенные поверх Data Vault. Подготовка: `psql ... -c 'SELECT * FROM dm.dm_sales_by_region_category;'`.*
 
 - `dm.dm_sales_star` — витрина-«звезда» из bridge; `dm.dm_sales_by_region_category`, `dm.dm_product_hierarchy` —
   materialized view с маржой прибыли.
@@ -437,9 +435,13 @@ SELECT audit.mk_check('t02', 'hub_location_key = md5(postal|city)', '0', count(*
 - `audit.rejected_records` — карантин строк, нарушивших правила качества: тест t08 подкладывает строку с
   `quantity = -5` и `discount = 1.5` и доказывает, что она уходит в карантин с указанием нарушений R3/R4.
 
-![Рис. 13. Метрики качества данных (audit.dq_metrics) и журнал загрузок](img/13_dq_metrics.png)
+![Рис. 15. Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки](img/17_dq_profile.png)
 
-*Рис. 13. Метрики качества данных (audit.dq_metrics) и журнал загрузок. Подготовка: `psql ... -f sql/99_checks/60_audit_metrics.sql`.*
+*Рис. 15. Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки. Подготовка: `psql ... -c 'SELECT * FROM dm.dm_dq_source_profile;'`.*
+
+![Рис. 16. Метрики качества данных (audit.dq_metrics) и журнал загрузок](img/13_dq_metrics.png)
+
+*Рис. 16. Метрики качества данных (audit.dq_metrics) и журнал загрузок. Подготовка: `psql ... -f sql/99_checks/60_audit_metrics.sql`.*
 
 ### E4. Измеримое доказательство выбора `DISTRIBUTED BY`
 
@@ -451,9 +453,9 @@ SELECT audit.mk_check('t02', 'hub_location_key = md5(postal|city)', '0', count(*
 Дополнительно доказано отсечение партиций: «Number of partitions to scan: 1 (out of 13)».
 Транскрипт: `docs/tmp/transcripts/50_e4_explain_distribution.txt`.
 
-![Рис. 12. E4: co-location (Gather Motion) против случайной дистрибуции (Redistribute Motion)](img/12_e4_explain.png)
+![Рис. 17. E4: co-location (Gather Motion) против случайной дистрибуции (Redistribute Motion)](img/12_e4_explain.png)
 
-*Рис. 12. E4: co-location (Gather Motion) против случайной дистрибуции (Redistribute Motion). Подготовка: `psql ... -f sql/99_checks/50_e4_explain_distribution.sql`.*
+*Рис. 17. E4: co-location (Gather Motion) против случайной дистрибуции (Redistribute Motion). Подготовка: `psql ... -f sql/99_checks/50_e4_explain_distribution.sql`.*
 
 ![Рис. 18. E4: отсечение партиций по дате загрузки](img/18_explain_partitions.png)
 
@@ -472,9 +474,9 @@ SELECT audit.mk_check('t02', 'hub_location_key = md5(postal|city)', '0', count(*
 `lnk_sales_line`/`sat_sales_line`, и наоборот — от строки хранилища к строкам источника. В staging хранится
 `sha256` файла (версия датасета). Транскрипт: `40_lineage_trace.txt`.
 
-![Рис. 14. E6: прослеживаемость «строка файла -> строка хранилища»](img/14_lineage.png)
+![Рис. 19. E6: прослеживаемость «строка файла -> строка хранилища»](img/14_lineage.png)
 
-*Рис. 14. E6: прослеживаемость «строка файла -> строка хранилища». Подготовка: `psql ... -f sql/99_checks/40_lineage_trace.sql`.*
+*Рис. 19. E6: прослеживаемость «строка файла -> строка хранилища». Подготовка: `psql ... -f sql/99_checks/40_lineage_trace.sql`.*
 
 
 ### E7. Reference-таблицы как альтернатива хабам
@@ -542,37 +544,35 @@ docs/tmp/                                  # НЕ коммитится: план
 
 Пошаговая инструкция с точными командами и указанием, что должно быть видно на каждом снимке, —
 в файле `docs/tmp/screenshots_plan.md` (генерируется командой `make screenshots`).
-В отчёте места под скриншоты уже размечены: **Рис. 1–14, 16–20** (всего 19 рисунков),
-файлы ожидаются в `docs/report/img/` с именами из плана. Для каждого рисунка в подписи
-указана команда подготовки; визуализация текущего состояния мест под скриншоты —
-`scripts/mark_screenshots.py` (плюс `make mark-screenshots`).
+В отчёте места под рисунки уже размечены: **Рис. 1 … Рис. 20** — нумерация сквозная,
+в порядке чтения. В `docs/report/img/` лежат PNG-заглушки: замените их реальными
+скриншотами с теми же именами и пересоберите отчёт (`make report`).
 
-Соответствие «рисунок в отчёте → файл скриншота»:
+Номера внутри имён файлов соответствуют плану (`screenshots_plan.md`), а не номерам рисунков.
 
-| Рисунок | Раздел отчёта | Файл |
-|---|---|---|
-| Рис. 1–3 | 4.1 Окружение | `01_greenplum_running.png`, `02_version.png`, `03_mpp_topology.png` |
-| Рис. 4–5 | 3.1 Состав DDL-скриптов | `04_tables_vault.png`, `05_ddl_link.png` |
-| Рис. 6, 19 | 3.4 Пример DDL | `06_ddl_satellite.png`, `19_vscode_ddl.png` |
-| Рис. 7–8 | 4.4 Загрузка (ELT) | `07_load_staging.png`, `08_load_dds.png` |
-| Рис. 9–10 | 4.3 Результат в цифрах | `09_table_counts.png`, `10_reconciliation.png` |
-| Рис. 11 | 5.2 Результат тестов | `11_tests_all_pass.png` |
-| Рис. 12, 18 | E4 (`EXPLAIN ANALYZE`) | `12_e4_explain.png`, `18_explain_partitions.png` |
-| Рис. 13 | E3 Метрики качества | `13_dq_metrics.png` |
-| Рис. 14 | E6 Lineage | `14_lineage.png` |
-| Рис. 16 | E1 Витрины | `16_marts.png` |
-| Рис. 17 | 1.3 Качество исходных данных | `17_dq_profile.png` |
-| Рис. 15 | 2.5 Диаграмма модели (уже вставлена как `diagrams/dv_model.png`) | `15_diagram.png` |
-| Рис. 20 | Приложение C | `20_google_doc.png` |
-
+| Рисунок | Раздел отчёта | Файл | Подготовка |
+|---|---|---|---|
+| Рис. 1 | 2.5 Диаграмма модели | `diagrams/dv_model.png` | `python3 scripts/make_diagram.py` |
+| Рис. 2 | 3.1 Состав DDL-скриптов | `img/04_tables_vault.png` | `psql ... -c '\dt vault.*'` |
+| Рис. 3 | 3.1 Состав DDL-скриптов | `img/05_ddl_link.png` | `psql ... -c '\d+ vault.lnk_sales_line'` |
+| Рис. 4 | 3.4 Пример DDL | `img/06_ddl_satellite.png` | `psql ... -c '\d+ vault.sat_sales_line'` |
+| Рис. 5 | 3.4 Пример DDL | `img/19_vscode_ddl.png` | `открыть sql/02_vault/10_ddl_hubs.sql` |
+| Рис. 6 | 4.1 Окружение | `img/01_greenplum_running.png` | `docker ps` |
+| Рис. 7 | 4.1 Окружение | `img/02_version.png` | `psql ... -c 'SELECT version();'` |
+| Рис. 8 | 4.1 Окружение | `img/03_mpp_topology.png` | `psql ... -c 'SELECT * FROM gp_segment_configuration;'` |
+| Рис. 9 | 4.3 Результат в цифрах | `img/09_table_counts.png` | `psql ... -f sql/99_checks/10_table_counts.sql` |
+| Рис. 10 | 4.3 Результат в цифрах | `img/10_reconciliation.png` | `psql ... -f sql/99_checks/20_reconciliation.sql` |
+| Рис. 11 | 4.4 Загрузка (ELT) | `img/07_load_staging.png` | `make stage` |
+| Рис. 12 | 4.4 Загрузка (ELT) | `img/08_load_dds.png` | `make load` |
+| Рис. 13 | 5.2 Результат тестов | `img/11_tests_all_pass.png` | `make test` |
+| Рис. 14 | 6, E1 Витрины | `img/16_marts.png` | `psql ... -c 'SELECT * FROM dm.dm_sales_by_region_category;'` |
+| Рис. 15 | 6, E3 Качество данных | `img/17_dq_profile.png` | `psql ... -c 'SELECT * FROM dm.dm_dq_source_profile;'` |
+| Рис. 16 | 6, E3 Качество данных | `img/13_dq_metrics.png` | `psql ... -f sql/99_checks/60_audit_metrics.sql` |
+| Рис. 17 | 6, E4 EXPLAIN | `img/12_e4_explain.png` | `psql ... -f sql/99_checks/50_e4_explain_distribution.sql` |
+| Рис. 18 | 6, E4 EXPLAIN | `img/18_explain_partitions.png` | `psql ... -c "EXPLAIN SELECT ... FROM staging.stg_superstore_raw WHERE load_dts ..."` |
+| Рис. 19 | 6, E6 Lineage | `img/14_lineage.png` | `psql ... -f sql/99_checks/40_lineage_trace.sql` |
+| Рис. 20 | Приложение C | `img/20_google_doc.png` | `загрузить DOCX в Google Docs и вставить скриншоты` |
 
 ![Рис. 20. Итоговый документ, собранный в Google Docs](img/20_google_doc.png)
 
 *Рис. 20. Итоговый документ, собранный в Google Docs. Подготовка: `загрузить DOCX в Google Docs и вставить скриншоты`.*
-
-
-
-
-
-
-
