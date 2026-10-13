@@ -77,14 +77,17 @@ test: ## Тесты корректности DV-модели (t01..t08) + сво
 
 all: up wait ddl download stage load test report ## Полный цикл
 
+evidence: ## Собрать доказательства в отчёт: реальные выводы команд (листинги) вместо скриншотов
+	python3 scripts/collect_evidence.py
+
 report: ## Собрать отчёт DOCX + PDF
 	bash scripts/build_report.sh
 
 diagram: ## Сгенерировать диаграмму модели (PNG/SVG из DOT)
 	python3 scripts/make_diagram.py
 
-mark-screenshots: ## Разметить места под скриншоты в отчёте (+ заглушки в docs/report/img)
-	python3 scripts/mark_screenshots.py
+mark-screenshots: ## УСТАРЕЛО: см. evidence (сбор реальных выводов команд в отчёт)
+	@echo "Вместо картинок-заглушек отчёт собирает реальные выводы команд: make evidence"
 
 screenshots: ## Сгенерировать план скриншотов и текстовые транскрипты
 	bash scripts/make_transcripts.sh
