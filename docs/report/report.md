@@ -216,7 +216,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "\dt vault.*"
 (31 rows)
 ```
 
-*Листинг 2. Созданные таблицы схемы vault.*
+*Листинг 1. Созданные таблицы схемы vault.*
 
 ```console
 $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "\d+ vault.lnk_sales_line"
@@ -254,7 +254,7 @@ Disabled internal triggers:
 Access method: heap
 ```
 
-*Листинг 3. DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии.*
+*Листинг 2. DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии.*
 
 В коде — построчные комментарии, объясняющие выбор решения; **для каждой таблицы и каждой колонки схемы
 `vault` в БД выполнен `COMMENT ON`** (это проверяется автотестом t01 через `pg_description`).
@@ -371,7 +371,7 @@ Access method: ao_column
 Options: compresstype=zstd, compresslevel=3
 ```
 
-*Листинг 4. DDL сателлита мер: AO/column, zstd, PK, CHECK, партиционирование.*
+*Листинг 3. DDL сателлита мер: AO/column, zstd, PK, CHECK, партиционирование.*
 
 ```console
 $ sed -n '1,44p' sql/02_vault/10_ddl_hubs.sql
@@ -421,7 +421,7 @@ CREATE TABLE vault.hub_country
 )
 ```
 
-*Листинг 5. Фрагмент исходного DDL хаба вместе с комментариями к таблице и колонкам.*
+*Листинг 4. Фрагмент исходного DDL хаба вместе с комментариями к таблице и колонкам.*
 
 Полный DDL — в каталогах `sql/02_vault`, `sql/04_bv`, `sql/05_marts`; листинг объектов — в транскриптах
 `docs/tmp/transcripts/05_ddl_objects.txt` и `30_storage_distribution.txt`.
@@ -440,10 +440,10 @@ CREATE TABLE vault.hub_country
 ```console
 $ docker ps --format table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}
 NAMES     IMAGE                       STATUS        PORTS
-gp7       andruche/greenplum:7-4seg   Up 11 hours   0.0.0.0:15432->5432/tcp, [::]:15432->5432/tcp
+gp7       andruche/greenplum:7-4seg   Up 12 hours   0.0.0.0:15432->5432/tcp, [::]:15432->5432/tcp
 ```
 
-*Листинг 6. Локальный кластер Greenplum запущен в Docker.*
+*Листинг 5. Локальный кластер Greenplum запущен в Docker.*
 
 ```console
 $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "SELECT version();"
@@ -453,7 +453,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "SELECT version();"
 (1 row)
 ```
 
-*Листинг 7. Версия СУБД.*
+*Листинг 6. Версия СУБД.*
 
 ```console
 $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "SELECT dbid, content, role, hostname, port, status FROM gp_segment_configuration ORDER BY content, role;"
@@ -467,7 +467,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "SELECT dbid, content, ro
 (5 rows)
 ```
 
-*Листинг 8. MPP-топология: координатор и 4 сегмента.*
+*Листинг 7. MPP-топология: координатор и 4 сегмента.*
 
 Версия СУБД: `PostgreSQL 12.12 (Greenplum Database 7.0.0)`; топология — координатор + 4 сегмента
 (транскрипт `00_environment.txt`, представление `gp_segment_configuration`).
@@ -504,15 +504,15 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -f sql/99_checks/10_table_co
 === Созданные таблицы и число строк ===
  schema_name |         object_name         |       kind        | rows_ 
 -------------+-----------------------------+-------------------+-------
- audit       | dq_metrics                  | table             | 60
- audit       | load_run_log                | table             | 70
+ audit       | dq_metrics                  | table             | 96
+ audit       | load_run_log                | table             | 112
  audit       | record_lineage              | table             | 9994
  audit       | rejected_records            | table             | 0
  audit       | test_results                | table             | 118
  bv          | bridge_sales_line           | table             | 9977
  bv          | efs_location_state          | table             | 632
  bv          | efs_state_region            | table             | 49
- bv          | pit_location                | table             | 3160
+ bv          | pit_location                | table             | 5056
  bv          | ref_segment                 | table             | 3
  bv          | ref_ship_mode               | table             | 4
  bv          | rts_hub_record              | table             | 721
@@ -554,7 +554,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -f sql/99_checks/10_table_co
 (5 rows)
 ```
 
-*Листинг 9. Таблицы заполнены данными: число строк в каждом объекте.*
+*Листинг 8. Таблицы заполнены данными: число строк в каждом объекте.*
 
 ```console
 $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -f sql/99_checks/20_reconciliation.sql
@@ -591,7 +591,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -f sql/99_checks/20_reconcil
 (12 rows)
 ```
 
-*Листинг 10. Сходимость контрольных сумм на всех слоях хранилища.*
+*Листинг 9. Сходимость контрольных сумм на всех слоях хранилища.*
 
 Динамика: `staging` 9994 строки → `vault.sat_sales_line` 9977 версий мер, восстанавливающих все 9994 строки
 источника → `bv.bridge_sales_line` 9977 → `dm.dm_sales_star` 9977. Контрольные суммы совпадают на всех слоях:
@@ -638,7 +638,7 @@ Greenplum      : localhost:15432 / vault_dv
 -------+--------------+-------------+--------------+-------------------+------------------
 ```
 
-*Листинг 11. Загрузка датасета в staging: 9994 строки, карантин пуст. Вывод сокращён; полный текст — в `docs/tmp/transcripts/` (скрипты `sql/99_checks/`) либо по указанной команде.*
+*Листинг 10. Загрузка датасета в staging: 9994 строки, карантин пуст. Вывод сокращён; полный текст — в `docs/tmp/transcripts/` (скрипты `sql/99_checks/`) либо по указанной команде.*
 
 ```console
 $ make load
@@ -697,7 +697,7 @@ $ make load
  bridge_sales_line  |  9977
  efs_location_state |   632
  efs_state_region   |    49
- pit_location       |  3792
+ pit_location       |  5688
  ref_segment        |     3
  ref_ship_mode      |     4
  rts_hub_record     |   721
@@ -714,7 +714,7 @@ $ make load
  dm.dm_sales_star           |  9994 | 2297200.8603 | 286397.0217
 ```
 
-*Листинг 12. ELT: загрузка хабов, ссылок и сателлитов, реконсиляция с источником. Вывод сокращён; полный текст — в `docs/tmp/transcripts/` (скрипты `sql/99_checks/`) либо по указанной команде.*
+*Листинг 11. ELT: загрузка хабов, ссылок и сателлитов, реконсиляция с источником. Вывод сокращён; полный текст — в `docs/tmp/transcripts/` (скрипты `sql/99_checks/`) либо по указанной команде.*
 
 ## 5. Тесты корректности
 
@@ -777,7 +777,7 @@ $ make test
 Отчёт сохранён: docs/tmp/transcripts/tests_report.txt
 ```
 
-*Листинг 13. Автотесты корректности: 118 проверок — все PASS. Вывод сокращён; полный текст — в `docs/tmp/transcripts/` (скрипты `sql/99_checks/`) либо по указанной команде.*
+*Листинг 12. Автотесты корректности: 118 проверок — все PASS. Вывод сокращён; полный текст — в `docs/tmp/transcripts/` (скрипты `sql/99_checks/`) либо по указанной команде.*
 
 **Итог: 118 проверок — 118 PASS, 0 FAIL** («ВСЕ ТЕСТЫ ПРОЙДЕНЫ — модель Data Vault корректна и сходится с
 источником»). Полный отчёт: `docs/tmp/transcripts/tests_report.txt`.
@@ -848,7 +848,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "SELECT sub_category_name
 (10 rows)
 ```
 
-*Листинг 14. Аналитические витрины, построенные поверх Data Vault.*
+*Листинг 13. Аналитические витрины, построенные поверх Data Vault.*
 
 - `dm.dm_sales_star` — витрина-«звезда» из bridge; `dm.dm_sales_by_region_category`, `dm.dm_product_hierarchy` —
   materialized view с маржой прибыли.
@@ -875,7 +875,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "SELECT * FROM dm.dm_dq_s
 (1 row)
 ```
 
-*Листинг 15. Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки.*
+*Листинг 14. Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки.*
 
 ```console
 $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -f sql/99_checks/60_audit_metrics.sql
@@ -926,7 +926,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -f sql/99_checks/60_audit_me
    1681 | dm        | dm.*                                                          |          9977 | 2026-10-13 08:43:43 | kaggle_superstore | витрины: 3 materialized view + dm_sales_star
 ```
 
-*Листинг 16. Метрики качества данных (audit.dq_metrics) и журнал загрузок. Вывод сокращён; полный текст — в `docs/tmp/transcripts/` (скрипты `sql/99_checks/`) либо по указанной команде.*
+*Листинг 15. Метрики качества данных (audit.dq_metrics) и журнал загрузок. Вывод сокращён; полный текст — в `docs/tmp/transcripts/` (скрипты `sql/99_checks/`) либо по указанной команде.*
 
 ### E4. Измеримое доказательство выбора `DISTRIBUTED BY`
 
@@ -980,7 +980,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "DROP TABLE IF EXISTS vau
 
 ```
 
-*Листинг 17. E4: соединение ссылки и сателлита — co-location без перераспределения против случайной дистрибуции сателлита (появляется Redistribute Motion).*
+*Листинг 16. E4: соединение ссылки и сателлита — co-location без перераспределения против случайной дистрибуции сателлита (появляется Redistribute Motion).*
 
 ```console
 $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "EXPLAIN SELECT count(*) FROM staging.stg_superstore_raw WHERE load_dts >= TIMESTAMP '2026-10-01 00:00:00' AND load_dts < TIMESTAMP '2026-11-01 00:00:00';"
@@ -996,7 +996,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -c "EXPLAIN SELECT count(*) 
 (7 rows)
 ```
 
-*Листинг 18. E4: отсечение партиций по дате загрузки.*
+*Листинг 17. E4: отсечение партиций по дате загрузки.*
 
 
 ### E5. CI: воспроизводимый прогон в GitHub Actions
@@ -1028,7 +1028,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -f sql/99_checks/40_lineage_
 === 3. Обратная трассировка: какие строки файла дали эту строку хранилища ===
  src_row_num |                            file_hash                             |      load_dts       
 -------------+------------------------------------------------------------------+---------------------
-           1 | ce8db84b6b049b19177ecdc43e46f8da6ce9c3d1784da4bf5dcf597c8b763611 | 2026-10-13 08:45:54
+           1 | ce8db84b6b049b19177ecdc43e46f8da6ce9c3d1784da4bf5dcf597c8b763611 | 2026-10-13 08:52:14
 (1 row)
 
 === 4. Полнота lineage ===
@@ -1038,7 +1038,7 @@ $ psql -h localhost -p 15432 -U gpadmin -d vault_dv -f sql/99_checks/40_lineage_
 (1 row)
 ```
 
-*Листинг 19. E6: прослеживаемость «строка файла -> строка хранилища».*
+*Листинг 18. E6: прослеживаемость «строка файла -> строка хранилища».*
 
 
 ### E7. Reference-таблицы как альтернатива хабам
@@ -1105,59 +1105,27 @@ docs/tmp/                                  # НЕ коммитится: тран
 ## Приложение C. Перечень доказательств
 
 Все доказательства в документе — текстовые и воспроизводимые: диаграмма модели (Рис. 1)
-и реальные выводы команд — **листинги**. Любую строку таблицы можно повторить на своём
-окружении; при желании листинг легко дополнить скриншотом той же команды.
-Полные тексты проверок сохранены в `docs/tmp/transcripts/`.
+и реальные выводы команд — **листинги 1…18**. Любую строку таблицы можно повторить
+на своём окружении; при желании листинг легко дополнить скриншотом той же команды.
+Полные тексты проверок сохранены в `docs/tmp/transcripts/`, сборка документа — `make report`.
 
 | Листинг | Раздел отчёта | Что показывает | Команда |
 |---|---|---|---|
-| Листинг 2 | 3.1 Состав DDL-скриптов | Созданные таблицы схемы vault | `psql -c "\dt vault.*"` |
-| Листинг 3 | 3.1 Состав DDL-скриптов | DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии | `psql -c "\d+ vault.lnk_sales_line"` |
-| Листинг 4 | 3.4 Пример DDL | DDL сателлита мер: AO/column, zstd, PK, CHECK, партиционирование | `psql -c "\d+ vault.sat_sales_line"` |
-| Листинг 5 | 3.4 Пример DDL | Фрагмент исходного DDL хаба вместе с комментариями к таблице и колонкам | `sed -n '1,44p' sql/02_vault/10_ddl_hubs.sql` |
-| Листинг 6 | 4.1 Окружение | Локальный кластер Greenplum запущен в Docker | `docker ps --format table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}` |
-| Листинг 7 | 4.1 Окружение | Версия СУБД | `psql -c "SELECT version();"` |
-| Листинг 8 | 4.1 Окружение | MPP-топология: координатор и 4 сегмента | `psql -c "SELECT dbid, content, role, hostname, port, status FROM gp_segment_con…"` |
-| Листинг 9 | 4.3 Результат в цифрах | Таблицы заполнены данными: число строк в каждом объекте | `psql -f sql/99_checks/10_table_counts.sql` |
-| Листинг 10 | 4.3 Результат в цифрах | Сходимость контрольных сумм на всех слоях хранилища | `psql -f sql/99_checks/20_reconciliation.sql` |
-| Листинг 11 | 4.4 Загрузка (ELT) | Загрузка датасета в staging: 9994 строки, карантин пуст | `make stage` |
-| Листинг 12 | 4.4 Загрузка (ELT) | ELT: загрузка хабов, ссылок и сателлитов, реконсиляция с источником | `make load` |
-| Листинг 13 | 5.2 Результат тестов | Автотесты корректности: 118 проверок — все PASS | `make test` |
-| Листинг 14 | 6, E1 Витрины | Аналитические витрины, построенные поверх Data Vault | `несколько команд (см. листинг)` |
-| Листинг 15 | 6, E3 Качество данных | Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки | `psql -c "SELECT * FROM dm.dm_dq_source_profile;"` |
-| Листинг 16 | 6, E3 Качество данных | Метрики качества данных (audit.dq_metrics) и журнал загрузок | `psql -f sql/99_checks/60_audit_metrics.sql` |
-| Листинг 17 | 6, E4 EXPLAIN | E4: соединение ссылки и сателлита — co-location без перераспределения против случайной дистрибуции сателлита (появляется Redistribute Motion) | `psql: создание копии + EXPLAIN + DROP (см. листинг)` |
-| Листинг 18 | 6, E4 EXPLAIN | E4: отсечение партиций по дате загрузки | `psql -c "EXPLAIN SELECT count(*) FROM staging.stg_superstore_raw WHERE load_dts…"` |
-| Листинг 19 | 6, E6 Lineage | E6: прослеживаемость «строка файла -> строка хранилища» | `psql -f sql/99_checks/40_lineage_trace.sql` |
-| Листинг 20 | Приложение C | Сборка итогового документа: файлы DOCX/PDF и размер отчёта | `несколько команд (см. листинг)` |
-
-```console
-$ bash scripts/build_report.sh
--- сборка DOCX и PDF
-=== Сборка DOCX ===
-  создан docs/tmp/report_build/Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault.docx
-=== Сборка PDF (xelatex, кириллица) ===
-  создан docs/tmp/report_build/Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault.pdf
-
-Готово. Загрузите DOCX в Google Docs (Файл -> Импорт) либо PDF.
-Каталог сборки: docs/tmp/report_build
-total 1880
-drwxr-xr-x@ 4 Lenovo  staff     128 Oct 13 00:45 .
-drwxr-xr-x@ 6 Lenovo  staff     192 Oct 13 00:45 ..
--rw-r--r--@ 1 Lenovo  staff  363475 Oct 13 11:45 Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault.docx
--rw-r--r--@ 1 Lenovo  staff  554814 Oct 13 11:46 Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault.pdf
-
-$ ls -la docs/tmp/report_build
--- файлы сборки
-total 1880
-drwxr-xr-x@ 4 Lenovo  staff     128 Oct 13 00:45 .
-drwxr-xr-x@ 6 Lenovo  staff     192 Oct 13 00:45 ..
--rw-r--r--@ 1 Lenovo  staff  363475 Oct 13 11:45 Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault.docx
--rw-r--r--@ 1 Lenovo  staff  554814 Oct 13 11:46 Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault.pdf
-
-$ bash -c unzip -l docs/tmp/report_build/*.docx | grep -c 'word/media'
--- число изображений в DOCX
-1
-```
-
-*Листинг 20. Сборка итогового документа: файлы DOCX/PDF и размер отчёта.*
+| Листинг 1 | 3.1 Состав DDL-скриптов | Созданные таблицы схемы vault | `psql -c "\dt vault.*"` |
+| Листинг 2 | 3.1 Состав DDL-скриптов | DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии | `psql -c "\d+ vault.lnk_sales_line"` |
+| Листинг 3 | 3.4 Пример DDL | DDL сателлита мер: AO/column, zstd, PK, CHECK, партиционирование | `psql -c "\d+ vault.sat_sales_line"` |
+| Листинг 4 | 3.4 Пример DDL | Фрагмент исходного DDL хаба вместе с комментариями к таблице и колонкам | `sed -n '1,44p' sql/02_vault/10_ddl_hubs.sql` |
+| Листинг 5 | 4.1 Окружение | Локальный кластер Greenplum запущен в Docker | `docker ps --format table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}` |
+| Листинг 6 | 4.1 Окружение | Версия СУБД | `psql -c "SELECT version();"` |
+| Листинг 7 | 4.1 Окружение | MPP-топология: координатор и 4 сегмента | `psql -c "SELECT dbid, content, role, hostname, port, status FROM gp_segment_con…"` |
+| Листинг 8 | 4.3 Результат в цифрах | Таблицы заполнены данными: число строк в каждом объекте | `psql -f sql/99_checks/10_table_counts.sql` |
+| Листинг 9 | 4.3 Результат в цифрах | Сходимость контрольных сумм на всех слоях хранилища | `psql -f sql/99_checks/20_reconciliation.sql` |
+| Листинг 10 | 4.4 Загрузка (ELT) | Загрузка датасета в staging: 9994 строки, карантин пуст | `make stage` |
+| Листинг 11 | 4.4 Загрузка (ELT) | ELT: загрузка хабов, ссылок и сателлитов, реконсиляция с источником | `make load` |
+| Листинг 12 | 5.2 Результат тестов | Автотесты корректности: 118 проверок — все PASS | `make test` |
+| Листинг 13 | 6, E1 Витрины | Аналитические витрины, построенные поверх Data Vault | `несколько команд (см. листинг)` |
+| Листинг 14 | 6, E3 Качество данных | Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки | `psql -c "SELECT * FROM dm.dm_dq_source_profile;"` |
+| Листинг 15 | 6, E3 Качество данных | Метрики качества данных (audit.dq_metrics) и журнал загрузок | `psql -f sql/99_checks/60_audit_metrics.sql` |
+| Листинг 16 | 6, E4 EXPLAIN | E4: соединение ссылки и сателлита — co-location без перераспределения против случайной дистрибуции сателлита (появляется Redistribute Motion) | `psql: создание копии + EXPLAIN + DROP (см. листинг)` |
+| Листинг 17 | 6, E4 EXPLAIN | E4: отсечение партиций по дате загрузки | `psql -c "EXPLAIN SELECT count(*) FROM staging.stg_superstore_raw WHERE load_dts…"` |
+| Листинг 18 | 6, E6 Lineage | E6: прослеживаемость «строка файла -> строка хранилища» | `psql -f sql/99_checks/40_lineage_trace.sql` |

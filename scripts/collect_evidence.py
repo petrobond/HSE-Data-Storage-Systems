@@ -7,7 +7,7 @@
 поэтому документ всегда соответствует коду, а проверяющий может повторить любую команду.
 
 Гарантии:
-  * нумерация сквозная в порядке чтения: Рис. 1 — диаграмма модели, Листинг 2…20 — выводы;
+  * нумерация сквозная в порядке чтения: Рис. 1 — диаграмма модели, Листинг 1…18 — выводы команд;
   * повторный запуск полностью перестраивает блоки (идемпотентно), нумерация не ломается;
   * у длинных выводов есть ограничение длины с явной пометкой о сокращении;
   * Приложение C генерируется: перечень «листинг -> раздел -> команда -> источник».
@@ -53,49 +53,49 @@ EXPLAIN_PART = ("EXPLAIN SELECT count(*) FROM staging.stg_superstore_raw "
 
 # (номер, раздел отчёта, подпись, вид, параметры)
 ITEMS: list[dict] = [
-    dict(number="2", section="3.1 Состав DDL-скриптов", caption="Созданные таблицы схемы vault",
+    dict(number="1", section="3.1 Состав DDL-скриптов", caption="Созданные таблицы схемы vault",
          kind="psql", meta="\\dt vault.*"),
-    dict(number="3", section="3.1 Состав DDL-скриптов",
+    dict(number="2", section="3.1 Состав DDL-скриптов",
          caption="DDL транзакционной ссылки: PK, FK, DISTRIBUTED BY, комментарии",
          kind="psql", meta="\\d+ vault.lnk_sales_line"),
-    dict(number="4", section="3.4 Пример DDL",
+    dict(number="3", section="3.4 Пример DDL",
          caption="DDL сателлита мер: AO/column, zstd, PK, CHECK, партиционирование",
          kind="psql", meta="\\d+ vault.sat_sales_line"),
-    dict(number="5", section="3.4 Пример DDL",
+    dict(number="4", section="3.4 Пример DDL",
          caption="Фрагмент исходного DDL хаба вместе с комментариями к таблице и колонкам",
          kind="excerpt", path="sql/02_vault/10_ddl_hubs.sql", rng="1,44p"),
-    dict(number="6", section="4.1 Окружение", caption="Локальный кластер Greenplum запущен в Docker",
+    dict(number="5", section="4.1 Окружение", caption="Локальный кластер Greenplum запущен в Docker",
          kind="shell", cmd=["docker", "ps", "--format",
                             "table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.Ports}}"]),
-    dict(number="7", section="4.1 Окружение", caption="Версия СУБД", kind="psql", sql=VER),
-    dict(number="8", section="4.1 Окружение", caption="MPP-топология: координатор и 4 сегмента",
+    dict(number="6", section="4.1 Окружение", caption="Версия СУБД", kind="psql", sql=VER),
+    dict(number="7", section="4.1 Окружение", caption="MPP-топология: координатор и 4 сегмента",
          kind="psql", sql=SEGMENTS),
-    dict(number="9", section="4.3 Результат в цифрах",
+    dict(number="8", section="4.3 Результат в цифрах",
          caption="Таблицы заполнены данными: число строк в каждом объекте",
          kind="psql_file", path="sql/99_checks/10_table_counts.sql"),
-    dict(number="10", section="4.3 Результат в цифрах",
+    dict(number="9", section="4.3 Результат в цифрах",
          caption="Сходимость контрольных сумм на всех слоях хранилища",
          kind="psql_file", path="sql/99_checks/20_reconciliation.sql"),
-    dict(number="11", section="4.4 Загрузка (ELT)",
+    dict(number="10", section="4.4 Загрузка (ELT)",
          caption="Загрузка датасета в staging: 9994 строки, карантин пуст",
          kind="make", target="stage", max_lines=26), 
-    dict(number="12", section="4.4 Загрузка (ELT)",
+    dict(number="11", section="4.4 Загрузка (ELT)",
          caption="ELT: загрузка хабов, ссылок и сателлитов, реконсиляция с источником",
          kind="make", target="load", drop=r"NOTICE|CONTEXT|^psql ", max_lines=70),
-    dict(number="13", section="5.2 Результат тестов",
+    dict(number="12", section="5.2 Результат тестов",
          caption="Автотесты корректности: 118 проверок — все PASS",
          kind="make", target="test", drop=r"^\s*$|NOTICE", max_lines=32, keep_tail=True),
-    dict(number="14", section="6, E1 Витрины",
+    dict(number="13", section="6, E1 Витрины",
          caption="Аналитические витрины, построенные поверх Data Vault",
          kind="multi", parts=[("витрина «регион x категория»", MARTS),
                               ("топ-10 подкатегорий по прибыли", TOP10)]),
-    dict(number="15", section="6, E3 Качество данных",
+    dict(number="14", section="6, E3 Качество данных",
          caption="Профиль качества источника: дубли строк, восстановленные ZIP, убыточные строки",
          kind="psql", sql=DQ_PROFILE),
-    dict(number="16", section="6, E3 Качество данных",
+    dict(number="15", section="6, E3 Качество данных",
          caption="Метрики качества данных (audit.dq_metrics) и журнал загрузок",
          kind="psql_file", path="sql/99_checks/60_audit_metrics.sql", max_lines=45),
-    dict(number="17", section="6, E4 EXPLAIN",
+    dict(number="16", section="6, E4 EXPLAIN",
          caption="E4: соединение ссылки и сателлита — co-location без перераспределения "
                  "против случайной дистрибуции сателлита (появляется Redistribute Motion)",
          kind="sequence", max_lines=24, steps=[
@@ -112,19 +112,11 @@ ITEMS: list[dict] = [
               "ON m.lnk_sales_line_key = l.lnk_sales_line_key;"),
              ("sql", "убираем временную копию", "DROP TABLE IF EXISTS vault.tmp_sat_random;"),
          ]),
-    dict(number="18", section="6, E4 EXPLAIN",
+    dict(number="17", section="6, E4 EXPLAIN",
          caption="E4: отсечение партиций по дате загрузки", kind="psql", sql=EXPLAIN_PART),
-    dict(number="19", section="6, E6 Lineage",
+    dict(number="18", section="6, E6 Lineage",
          caption="E6: прослеживаемость «строка файла -> строка хранилища»",
          kind="psql_file", path="sql/99_checks/40_lineage_trace.sql", max_lines=40),
-    dict(number="20", section="Приложение C",
-         caption="Сборка итогового документа: файлы DOCX/PDF и размер отчёта",
-         kind="multi", parts=[], shell_parts=[
-             ("сборка DOCX и PDF", ["bash", "scripts/build_report.sh"]),
-             ("файлы сборки", ["ls", "-la", "docs/tmp/report_build"]),
-             ("число изображений в DOCX", ["bash", "-c",
-              "unzip -l docs/tmp/report_build/*.docx | grep -c 'word/media'"]),
-             ("--- конец вывода ---", None)]),
 ]
 
 LISTING_RE = re.compile(r"```console\n.*?\n```\n\n\*Листинг \d+\.[^\n]*\*\n*", re.S)
@@ -273,16 +265,16 @@ def hint(item: dict) -> str:
 
 # Порядок чтения отчёта: где размещается каждый листинг
 GROUPS: list[tuple[str, str, list[str]]] = [
-    ("before", "В коде — построчные комментарии", ["2", "3"]),
-    ("before", "Полный DDL — в каталогах `sql/02_vault`", ["4", "5"]),
-    ("before", "Версия СУБД: `PostgreSQL 12.12", ["6", "7", "8"]),
-    ("before", "Динамика: `staging` 9994 строки", ["9", "10"]),
-    ("before", "## 5. Тесты корректности", ["11", "12"]),
-    ("before", "**Итог: 118 проверок", ["13"]),
-    ("before", "- `dm.dm_sales_star` — витрина-«звезда» из bridge", ["14"]),
-    ("before", "### E4. Измеримое доказательство выбора `DISTRIBUTED BY`", ["15", "16"]),
-    ("after", "Транскрипт: `docs/tmp/transcripts/50_e4_explain_distribution.txt`.", ["17", "18"]),
-    ("after", "Транскрипт: `40_lineage_trace.txt`.", ["19"]),
+    ("before", "В коде — построчные комментарии", ["1", "2"]),
+    ("before", "Полный DDL — в каталогах `sql/02_vault`", ["3", "4"]),
+    ("before", "Версия СУБД: `PostgreSQL 12.12", ["5", "6", "7"]),
+    ("before", "Динамика: `staging` 9994 строки", ["8", "9"]),
+    ("before", "## 5. Тесты корректности", ["10", "11"]),
+    ("before", "**Итог: 118 проверок", ["12"]),
+    ("before", "- `dm.dm_sales_star` — витрина-«звезда» из bridge", ["13"]),
+    ("before", "### E4. Измеримое доказательство выбора `DISTRIBUTED BY`", ["14", "15"]),
+    ("after", "Транскрипт: `docs/tmp/transcripts/50_e4_explain_distribution.txt`.", ["16", "17"]),
+    ("after", "Транскрипт: `40_lineage_trace.txt`.", ["18"]),
 ]
 APPENDIX_ANCHOR = "## Приложение C. Перечень доказательств"
 LEGACY_APPENDIX = "## Приложение C. План скриншотов"
@@ -295,7 +287,7 @@ def insert(anchor: str, block: str, text: str, before: bool = True) -> str:
     return text.replace(anchor, replacement, 1)
 
 
-def build_appendix(listing20: str) -> str:
+def build_appendix() -> str:
     rows = "\n".join(
         f"| Листинг {item['number']} | {item['section']} | {item['caption']} | `{hint(item)}` |"
         for item in ITEMS
@@ -303,12 +295,12 @@ def build_appendix(listing20: str) -> str:
     return (
         f"{APPENDIX_ANCHOR}\n\n"
         "Все доказательства в документе — текстовые и воспроизводимые: диаграмма модели (Рис. 1)\n"
-        "и реальные выводы команд — **листинги**. Любую строку таблицы можно повторить на своём\n"
-        "окружении; при желании листинг легко дополнить скриншотом той же команды.\n"
-        "Полные тексты проверок сохранены в `docs/tmp/transcripts/`.\n\n"
+        "и реальные выводы команд — **листинги 1…18**. Любую строку таблицы можно повторить\n"
+        "на своём окружении; при желании листинг легко дополнить скриншотом той же команды.\n"
+        "Полные тексты проверок сохранены в `docs/tmp/transcripts/`, сборка документа — `make report`.\n\n"
         "| Листинг | Раздел отчёта | Что показывает | Команда |\n"
         "|---|---|---|---|\n"
-        + rows + "\n\n" + listing20
+        + rows + "\n"
     )
 
 
@@ -339,7 +331,7 @@ def main() -> int:
         text = insert(anchor, block, text, before=(position == "before"))
 
     # 5. Приложение C с перечнем листингов (и сам листинг 20 внутри него)
-    text = text.rstrip() + "\n\n" + build_appendix(blocks["20"])
+    text = text.rstrip() + "\n\n" + build_appendix()
     REPORT.write_text(text, encoding="utf-8")
 
     # 6. Самопроверка: сквозная нумерация 2..20 без пропусков и повторов
