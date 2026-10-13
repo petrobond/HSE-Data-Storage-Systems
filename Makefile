@@ -80,8 +80,17 @@ all: up wait ddl download stage load test report ## Полный цикл
 evidence: ## Собрать доказательства в отчёт: реальные выводы команд (листинги) вместо скриншотов
 	python3 scripts/collect_evidence.py
 
-report: ## Собрать отчёт DOCX + PDF
-	bash scripts/build_report.sh
+report: ## Собрать отчёт DOCX + PDF в двух ориентациях (портрет и ландшафт)
+	bash scripts/build_report.sh all
+
+report-portrait: ## Собрать только портретную версию DOCX/PDF
+	bash scripts/build_report.sh portrait
+
+report-landscape: ## Собрать только ландшафтную версию DOCX/PDF
+	bash scripts/build_report.sh landscape
+
+report-check: ## Проверить собранные артефакты (ориентация, размер, листинги)
+	python3 scripts/check_report_artifacts.py
 
 diagram: ## Сгенерировать диаграмму модели (PNG/SVG из DOT)
 	python3 scripts/make_diagram.py

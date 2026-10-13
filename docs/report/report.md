@@ -1081,7 +1081,7 @@ make up && make wait      # Greenplum 7 в Docker (координатор + 4 с
 make ddl                  # схемы и таблицы
 make download && make stage && make load   # загрузка данных датасета
 make test                 # 118 автотестов
-make screenshots && make evidence && make report   # транскрипты, листинги в отчёт, DOCX/PDF
+make screenshots && make evidence && make report   # транскрипты, листинги в отчёт, DOCX/PDF (портрет + ландшафт)
 make teardown             # в конце: удалить контейнер, образ, тома и временные данные
 ```
 

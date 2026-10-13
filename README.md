@@ -105,8 +105,20 @@ docs/tmp/                     НЕ коммитится: транскрипты,
 
 ## Итоговый документ
 
-`docs/report/report.md` → `make report` → DOCX/PDF в `docs/tmp/report_build/`.
-DOCX открывается в Google Docs напрямую (Файл → Импорт), PDF — как альтернатива.
+`docs/report/report.md` → `make report` → **четыре** артефакта в `docs/tmp/report_build/`:
+
+| Файл | Формат | Ориентация |
+|---|---|---|
+| `Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault.docx` | DOCX (импорт в Google Docs) | портрет |
+| `Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault.pdf` | PDF (xelatex) | портрет |
+| `Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault_landscape.docx` | DOCX | ландшафт |
+| `Бондарев_Петр_Итоговое_ДЗ_модуль_1_Data_Vault_landscape.pdf` | PDF | ландшафт |
+
+Отдельные цели: `make report-portrait`, `make report-landscape`, проверка собранного — `make report-check`
+(скрипт `scripts/check_report_artifacts.py` печатает ориентацию и размер каждого файла).
+Ландшафтная версия удобна для широких терминальных выводов: страница A4 landscape, поля 2 см;
+ориентация DOCX задаётся патчем `sectPr/pgSz` (`scripts/make_landscape_docx.py`), PDF — через
+`geometry:a4paper,landscape`.
 
 Отчёт построен на **текстовых доказательствах**: диаграмма модели (Рис. 1) и 18 **листингов** —
 реальные выводы команд (`docker ps`, `psql`, `make stage/load/test`), которые вставляются в отчёт
